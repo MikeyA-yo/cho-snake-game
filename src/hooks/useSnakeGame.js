@@ -8,7 +8,7 @@ import {
     checkCollision,
 } from '../utils/gameUtils';
 
-// Difficulty presets: [baseSpeed, minSpeed, speedDecrease]
+// Difficulty presets
 export const DIFFICULTY_MODES = {
     easy: { label: 'Easy', baseSpeed: 320, minSpeed: 120, speedDecrease: 6, description: 'Relaxed pace, perfect for beginners' },
     medium: { label: 'Medium', baseSpeed: 220, minSpeed: 90, speedDecrease: 7, description: 'A balanced challenge' },
@@ -26,14 +26,13 @@ const useSnakeGame = () => {
 
     const mode = DIFFICULTY_MODES[difficulty];
 
-    // Dynamic speed: gets faster as the snake grows
+    // Dynamic speed
     const speed = useMemo(() => {
         const foodsEaten = snake.length - 1;
         const currentSpeed = mode.baseSpeed - (foodsEaten * mode.speedDecrease);
         return Math.max(currentSpeed, mode.minSpeed);
     }, [snake.length, mode]);
 
-    // Initialize food on mount
     useEffect(() => {
         setFood(generateFood(INITIAL_SNAKE));
     }, []);
@@ -83,35 +82,31 @@ const useSnakeGame = () => {
         }
     }, [snake, direction, status, food]);
 
-    // Game Loop — uses dynamic speed
     useInterval(moveSnake, status === 'PLAYING' ? speed : null);
+
+    // Shared direction change logic (used by keyboard, swipe, D-pad)
+    const changeDirection = useCallback((newDir) => {
+        if (status !== 'PLAYING') return;
+        if (newDir === 'UP' && direction.y === 0) setDirection({ x: 0, y: -1 });
+        if (newDir === 'DOWN' && direction.y === 0) setDirection({ x: 0, y: 1 });
+        if (newDir === 'LEFT' && direction.x === 0) setDirection({ x: -1, y: 0 });
+        if (newDir === 'RIGHT' && direction.x === 0) setDirection({ x: 1, y: 0 });
+    }, [direction, status]);
 
     // Keyboard controls
     useEffect(() => {
         const handleKeyDown = (e) => {
-            if (status !== 'PLAYING') return;
-
             switch (e.key) {
-                case 'ArrowUp':
-                    if (direction.y === 0) setDirection({ x: 0, y: -1 });
-                    break;
-                case 'ArrowDown':
-                    if (direction.y === 0) setDirection({ x: 0, y: 1 });
-                    break;
-                case 'ArrowLeft':
-                    if (direction.x === 0) setDirection({ x: -1, y: 0 });
-                    break;
-                case 'ArrowRight':
-                    if (direction.x === 0) setDirection({ x: 1, y: 0 });
-                    break;
-                default:
-                    break;
+                case 'ArrowUp': changeDirection('UP'); break;
+                case 'ArrowDown': changeDirection('DOWN'); break;
+                case 'ArrowLeft': changeDirection('LEFT'); break;
+                case 'ArrowRight': changeDirection('RIGHT'); break;
+                default: break;
             }
         };
-
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [direction, status]);
+    }, [changeDirection]);
 
     return {
         snake,
@@ -120,6 +115,7 @@ const useSnakeGame = () => {
         speed,
         status,
         difficulty,
+        changeDirection,
         startGame,
         pauseGame,
         resetGame,
