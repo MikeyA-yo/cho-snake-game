@@ -29,35 +29,37 @@ body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
 
 #root {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
 
 /* ---------- App Container ---------- */
 .app-container {
   position: relative;
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   padding-top: 0.75rem;
+  padding-bottom: 1rem;
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .app-title {
@@ -81,13 +83,15 @@ body {
 .score-hud {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   background-color: rgba(30, 41, 59, 0.7);
-  padding: 12px 24px;
-  border-radius: 16px;
+  padding: 8px 16px;
+  border-radius: 14px;
   border: 1px solid var(--border-subtle);
   backdrop-filter: blur(8px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .score-hud .score-icon {
@@ -95,10 +99,49 @@ body {
 }
 
 .score-hud .score-value {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
   font-family: 'JetBrains Mono', monospace, 'Courier New';
   color: #fff;
+}
+
+.hud-divider {
+  color: var(--border-subtle);
+  font-size: 1rem;
+  margin: 0 2px;
+}
+
+.highscore-icon {
+  color: var(--accent-yellow);
+  opacity: 0.7;
+}
+
+.highscore-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+}
+
+.pause-btn {
+  margin-left: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background-color: rgba(30, 41, 59, 0.6);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.pause-btn:hover,
+.pause-btn:active {
+  border-color: var(--accent-yellow);
+  color: var(--accent-yellow);
 }
 
 .speed-indicator {
@@ -208,8 +251,9 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  padding: 1rem;
   text-align: center;
+  overflow-y: auto;
 }
 
 .overlay-gameover-title {
@@ -272,13 +316,36 @@ body {
   box-shadow: 0 4px 30px rgba(16, 185, 129, 0.6);
 }
 
+/* ---------- New High Score Badge ---------- */
+.new-highscore-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 0.5rem;
+  padding: 6px 16px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(245, 158, 11, 0.2));
+  border: 1px solid rgba(250, 204, 21, 0.4);
+  color: var(--accent-yellow);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
+
+.mode-highscore {
+  font-size: 0.8rem;
+  color: var(--accent-yellow);
+  font-weight: 600;
+  opacity: 0.8;
+}
+
 /* ---------- Mode Selector ---------- */
 .mode-selector {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
 }
 
 .mode-selector-title {
@@ -414,10 +481,73 @@ body {
   border: 1px solid rgba(51, 65, 85, 0.4);
 }
 
-/* On small screens, put D-pad below */
+/* On small screens */
 @media (max-width: 640px) {
+  .app-title {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .score-hud {
+    padding: 6px 12px;
+    gap: 0.3rem;
+  }
+
+  .score-hud .score-value {
+    font-size: 1rem;
+  }
+
+  .speed-indicator {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    margin-left: 4px;
+  }
+
+  .game-grid {
+    width: min(85vw, 360px);
+    height: min(85vw, 360px);
+  }
+
   .board-row {
     flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .overlay-gameover-title {
+    font-size: 2rem;
+  }
+
+  .overlay-idle-title {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .overlay-paused-title {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .overlay-button {
+    padding: 10px 24px;
+    font-size: 0.95rem;
+  }
+
+  .mode-btn {
+    padding: 7px 14px;
+    font-size: 0.8rem;
+  }
+
+  .mode-selector {
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .mode-selector-title {
+    font-size: 0.75rem;
+  }
+
+  .controls-hint {
+    font-size: 0.7rem;
   }
 
   .dpad-container {
@@ -425,8 +555,13 @@ body {
     gap: 0;
   }
 
-  .dpad-container .dpad-row:first-child,
-  .dpad-container .dpad-row:last-child {
-    position: relative;
+  .dpad-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .dpad-center {
+    width: 38px;
+    height: 38px;
   }
 }
