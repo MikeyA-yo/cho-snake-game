@@ -4,7 +4,7 @@ import SnakeSegment from './SnakeSegment';
 import FoodItem from './FoodItem';
 import GameOverlay from './GameOverlay';
 import DPad from './DPad';
-import { Trophy } from 'lucide-react';
+import { Trophy, Crown, Pause } from 'lucide-react';
 import { DIFFICULTY_MODES } from '../hooks/useSnakeGame';
 
 const SWIPE_THRESHOLD = 30;
@@ -24,10 +24,15 @@ const PauseHandler = ({ pauseGame }) => {
 };
 
 const GameBoard = () => {
-    const { snake, food, score, speed, status, difficulty, changeDirection, startGame, pauseGame, GRID_SIZE: gridSize } = useSnakeGame();
+    const {
+        snake, food, score, speed, status, difficulty,
+        highScores, isNewHighScore, changeDirection,
+        startGame, pauseGame, GRID_SIZE: gridSize
+    } = useSnakeGame();
 
     const modeLabel = DIFFICULTY_MODES[difficulty]?.label || 'Easy';
     const speedLabel = speed >= 250 ? 'Slow' : speed >= 180 ? 'Normal' : speed >= 120 ? 'Fast' : 'Insane';
+    const currentHighScore = highScores[difficulty] || 0;
 
     // --- Swipe / Touch handling ---
     const touchStart = useRef(null);
@@ -79,9 +84,19 @@ const GameBoard = () => {
         <div className="gameboard-wrapper">
             {/* Score HUD */}
             <div className="score-hud">
-                <Trophy className="score-icon" size={22} />
+                <Trophy className="score-icon" size={18} />
                 <span className="score-value">{score}</span>
-                <span className="speed-indicator">⚡ {modeLabel} · {speedLabel}</span>
+                <span className="hud-divider">|</span>
+                <Crown size={14} className="highscore-icon" />
+                <span className="highscore-value">{currentHighScore}</span>
+                <span className="speed-indicator">⚡ {modeLabel}</span>
+
+                {/* Pause button for mobile */}
+                {status === 'PLAYING' && (
+                    <button className="pause-btn" onClick={pauseGame} aria-label="Pause">
+                        <Pause size={16} />
+                    </button>
+                )}
             </div>
 
             {/* Board + D-Pad side by side */}
@@ -114,7 +129,14 @@ const GameBoard = () => {
 
                     <FoodItem x={food.x} y={food.y} />
 
-                    <GameOverlay status={status} startGame={startGame} score={score} currentDifficulty={difficulty} />
+                    <GameOverlay
+                        status={status}
+                        startGame={startGame}
+                        score={score}
+                        currentDifficulty={difficulty}
+                        highScores={highScores}
+                        isNewHighScore={isNewHighScore}
+                    />
                 </div>
 
                 {/* D-Pad beside the board */}
@@ -123,7 +145,7 @@ const GameBoard = () => {
 
             {/* Controls Hint */}
             <div className="controls-hint">
-                <b>Arrow Keys</b> · <b>Swipe</b> · <b>D-Pad</b> to Move · <b>Space</b> to Pause
+                <b>Arrow Keys</b> · <b>Swipe</b> · <b>D-Pad</b> · <b>Space</b> to Pause
             </div>
 
             <PauseHandler pauseGame={pauseGame} />

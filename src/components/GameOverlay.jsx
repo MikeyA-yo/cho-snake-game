@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Play } from 'lucide-react';
+import { Play, Star } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DIFFICULTY_MODES } from '../hooks/useSnakeGame';
 
 const modeKeys = Object.keys(DIFFICULTY_MODES);
 
-const GameOverlay = ({ status, startGame, score, currentDifficulty }) => {
+const GameOverlay = ({ status, startGame, score, currentDifficulty, highScores, isNewHighScore }) => {
     const [selectedMode, setSelectedMode] = useState(currentDifficulty || 'easy');
 
     useEffect(() => {
@@ -39,19 +39,30 @@ const GameOverlay = ({ status, startGame, score, currentDifficulty }) => {
                         <motion.div
                             initial={{ scale: 0.8, y: 20 }}
                             animate={{ scale: 1, y: 0 }}
-                            style={{ marginBottom: '1.5rem' }}
+                            style={{ marginBottom: '1rem' }}
                         >
                             <h2 className="overlay-gameover-title">GAME OVER</h2>
                             <p className="overlay-score-text">
                                 Final Score: <span className="overlay-score-value">{score}</span>
                             </p>
+                            {isNewHighScore && (
+                                <motion.div
+                                    initial={{ scale: 0, rotate: -10 }}
+                                    animate={{ scale: 1, rotate: 0 }}
+                                    transition={{ type: 'spring', stiffness: 300, damping: 15, delay: 0.3 }}
+                                    className="new-highscore-badge"
+                                >
+                                    <Star size={16} fill="currentColor" />
+                                    NEW HIGH SCORE!
+                                </motion.div>
+                            )}
                         </motion.div>
                     )}
 
                     {status === 'IDLE' && (
-                        <div style={{ marginBottom: '1.5rem' }}>
+                        <div style={{ marginBottom: '1rem' }}>
                             <h2 className="overlay-idle-title">Ready to Play?</h2>
-                            <p className="overlay-idle-subtitle">Use Arrow Keys to Move</p>
+                            <p className="overlay-idle-subtitle">Use Arrow Keys or Swipe</p>
                         </div>
                     )}
 
@@ -77,6 +88,11 @@ const GameOverlay = ({ status, startGame, score, currentDifficulty }) => {
                             <span className="mode-description">
                                 {DIFFICULTY_MODES[selectedMode].description}
                             </span>
+                            {highScores && highScores[selectedMode] > 0 && (
+                                <span className="mode-highscore">
+                                    Best: {highScores[selectedMode]}
+                                </span>
+                            )}
                         </div>
                     )}
 

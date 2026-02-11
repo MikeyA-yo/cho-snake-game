@@ -16,6 +16,26 @@ export const DIFFICULTY_MODES = {
     crazy: { label: 'Crazy', baseSpeed: 90, minSpeed: 40, speedDecrease: 5, description: 'Pure chaos. Good luck.' },
 };
 
+// LocalStorage helpers
+const getHighScores = () => {
+    try {
+        const stored = localStorage.getItem('cho-snake-highscores');
+        return stored ? JSON.parse(stored) : { easy: 0, medium: 0, hard: 0, crazy: 0 };
+    } catch {
+        return { easy: 0, medium: 0, hard: 0, crazy: 0 };
+    }
+};
+
+const saveHighScore = (difficulty, score) => {
+    const scores = getHighScores();
+    if (score > (scores[difficulty] || 0)) {
+        scores[difficulty] = score;
+        localStorage.setItem('cho-snake-highscores', JSON.stringify(scores));
+        return true; // new high score!
+    }
+    return false;
+};
+
 const useSnakeGame = () => {
     const [snake, setSnake] = useState(INITIAL_SNAKE);
     const [food, setFood] = useState({ x: 5, y: 5 });
@@ -23,6 +43,8 @@ const useSnakeGame = () => {
     const [status, setStatus] = useState('IDLE');
     const [score, setScore] = useState(0);
     const [difficulty, setDifficulty] = useState('easy');
+    const [highScores, setHighScores] = useState(getHighScores);
+    const [isNewHighScore, setIsNewHighScore] = useState(false);
 
     const mode = DIFFICULTY_MODES[difficulty];
 
@@ -37,12 +59,22 @@ const useSnakeGame = () => {
         setFood(generateFood(INITIAL_SNAKE));
     }, []);
 
+    // Check for high score on game over
+    useEffect(() => {
+        if (status === 'GAME_OVER' && score > 0) {
+            const isNew = saveHighScore(difficulty, score);
+            setIsNewHighScore(isNew);
+            if (isNew) setHighScores(getHighScores());
+        }
+    }, [status, score, difficulty]);
+
     const startGame = useCallback((selectedDifficulty) => {
         if (selectedDifficulty) setDifficulty(selectedDifficulty);
         setSnake(INITIAL_SNAKE);
         setDirection(INITIAL_DIRECTION);
         setScore(0);
         setStatus('PLAYING');
+        setIsNewHighScore(false);
         setFood(generateFood(INITIAL_SNAKE));
     }, []);
 
@@ -84,7 +116,7 @@ const useSnakeGame = () => {
 
     useInterval(moveSnake, status === 'PLAYING' ? speed : null);
 
-    // Shared direction change logic (used by keyboard, swipe, D-pad)
+    // Shared direction change logic
     const changeDirection = useCallback((newDir) => {
         if (status !== 'PLAYING') return;
         if (newDir === 'UP' && direction.y === 0) setDirection({ x: 0, y: -1 });
@@ -115,6 +147,8 @@ const useSnakeGame = () => {
         speed,
         status,
         difficulty,
+        highScores,
+        isNewHighScore,
         changeDirection,
         startGame,
         pauseGame,
