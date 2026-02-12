@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Play, Star } from 'lucide-react';
+import { Play, Star, Utensils, Flame, ArrowUp } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DIFFICULTY_MODES } from '../hooks/useSnakeGame';
 
 const modeKeys = Object.keys(DIFFICULTY_MODES);
 
-const GameOverlay = ({ status, startGame, score, currentDifficulty, highScores, isNewHighScore }) => {
+const GameOverlay = ({
+    status, startGame, score, currentDifficulty,
+    highScores, isNewHighScore, level, maxCombo, totalFoodEaten,
+}) => {
     const [selectedMode, setSelectedMode] = useState(currentDifficulty || 'easy');
 
     useEffect(() => {
@@ -39,7 +42,7 @@ const GameOverlay = ({ status, startGame, score, currentDifficulty, highScores, 
                         <motion.div
                             initial={{ scale: 0.8, y: 20 }}
                             animate={{ scale: 1, y: 0 }}
-                            style={{ marginBottom: '1rem' }}
+                            style={{ marginBottom: '0.75rem' }}
                         >
                             <h2 className="overlay-gameover-title">GAME OVER</h2>
                             <p className="overlay-score-text">
@@ -52,17 +55,35 @@ const GameOverlay = ({ status, startGame, score, currentDifficulty, highScores, 
                                     transition={{ type: 'spring', stiffness: 300, damping: 15, delay: 0.3 }}
                                     className="new-highscore-badge"
                                 >
-                                    <Star size={16} fill="currentColor" />
+                                    <Star size={14} fill="currentColor" />
                                     NEW HIGH SCORE!
                                 </motion.div>
                             )}
+
+                            {/* Game Stats */}
+                            <div className="game-stats">
+                                <div className="stat-item">
+                                    <ArrowUp size={14} />
+                                    <span>Level {level}</span>
+                                </div>
+                                <div className="stat-item">
+                                    <Utensils size={14} />
+                                    <span>{totalFoodEaten} eaten</span>
+                                </div>
+                                {maxCombo > 0 && (
+                                    <div className="stat-item">
+                                        <Flame size={14} />
+                                        <span>{maxCombo}x combo</span>
+                                    </div>
+                                )}
+                            </div>
                         </motion.div>
                     )}
 
                     {status === 'IDLE' && (
                         <div style={{ marginBottom: '1rem' }}>
                             <h2 className="overlay-idle-title">Ready to Play?</h2>
-                            <p className="overlay-idle-subtitle">Use Arrow Keys or Swipe</p>
+                            <p className="overlay-idle-subtitle">Arrow Keys · Swipe · D-Pad</p>
                         </div>
                     )}
 
@@ -70,7 +91,7 @@ const GameOverlay = ({ status, startGame, score, currentDifficulty, highScores, 
                         <h2 className="overlay-paused-title">PAUSED</h2>
                     )}
 
-                    {/* Mode Selector — shown on IDLE and GAME_OVER */}
+                    {/* Mode Selector */}
                     {(status === 'IDLE' || status === 'GAME_OVER') && (
                         <div className="mode-selector">
                             <span className="mode-selector-title">Select Difficulty</span>
